@@ -1,24 +1,16 @@
-# Importing necessary libraries
 import re
+import os
 from collections import Counter
 import pandas as pd
+from datetime import datetime
 
-# Read the uploaded file
-file_path = '/Users/hwang-injun/Downloads/sample.txt'
-with open(file_path, 'r', encoding='utf-8') as f:
-    text = f.read()
-
-# Normalize the text by removing any special characters
-normalized_text = re.sub(r'[^가-힣\s]', '', text)
-
-# Tokenize the text into words
-words = normalized_text.split()
-
-# Create a Counter object to count the frequency of each word
-word_count = Counter(words)
+# Constants
+BASE_DIR = 'result'
+TODAY = datetime.now().strftime('%Y%m%d')
+INPUT_DIR_PATH = os.path.join(BASE_DIR, TODAY)
 
 # List of unnecessary words
-unnecessary_words = [
+UNNECESSARY_WORDS = [
     "가지고", "거", "거는", "거든", "거든요", "게", "그", "그거", "그게", "그냥", "그래도", "그래서", "그러고 나서", 
     "그러고 보니", "그러고는", "그러니까", "그러다가", "그러다보니", "그러면", "그런 거야", "그런 거지", "그런 건", 
     "그런 것", "그런 것 같아", "그런 것만", "그런 것보다", "그런 것에", "그런 것으로", "그런 것은", "그런 것을", "그런 것이", 
@@ -33,17 +25,48 @@ unnecessary_words = [
     "지요", "진짜", "헐", "확실히"
 ]
 
-# Create a DataFrame to store the analysis
-df = pd.DataFrame(list(word_count.items()), columns=['Most Used Words', 'Count'])
-df['Needed or Not'] = ~df['Most Used Words'].isin(unnecessary_words)
-df.sort_values(by='Count', ascending=False, inplace=True)
-df.reset_index(drop=True, inplace=True)
 
-# Filter the top 20 most frequently used words
-top_20_df = df.head(20)
+def read_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return f.read()
 
-# Create a CSV file
-csv_path = '/Users/hwang-injun/Downloads/sample.csv'
-top_20_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
+def normalize_and_tokenize(text):
+    normalized_text = re.sub(r'[^가-힣\s]', '', text)
+    return normalized_text.split()
 
-csv_path, top_20_df.head()
+def analyze_words(words):
+    word_count = Counter(words)
+    df = pd.DataFrame(list(word_count.items()), columns=['Most Used Words', 'Count'])
+    df['Needed or Not'] = ~df['Most Used Words'].isin(UNNECESSARY_WORDS)
+    df.sort_values(by='Count', ascending=False, inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    return df
+
+def save_to_csv(df, csv_path):
+    df.to_csv(csv_path, index=False, encoding='utf-8-sig')
+
+def main():
+    if not os.path.exists(INPUT_DIR_PATH):
+        print(f"{INPUT_DIR_PATH} 폴더가 존재하지 않습니다.")
+        return
+
+    for file_name in os.listdir(INPUT_DIR_PATH):
+        if file_name.endswith('.txt'):
+            input_file_path = os.path.join(INPUT_DIR_PATH, file_name)
+            output_csv_path = os.path.join(INPUT_DIR_PATH, file_name.replace('.txt', '.csv'))
+
+            text = read_file(input_file_path)
+            words = normalize_and_tokenize(text)
+            df = analyze_words(words)
+            top_20_df = df.head(20)
+            save_to_csv(top_20_df, output_csv_path)
+            print(output_csv_path, top_20_df.head())
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
