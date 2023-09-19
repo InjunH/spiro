@@ -41,7 +41,20 @@ def call_vito_api_with_token(file_path):
         print("Access Token이 없습니다. 먼저 인증을 진행해주세요.")
         sys.exit(1)
 
-    config = {}
+    config = {
+        "use_diarization": True,
+        "diarization": {
+            "spk_count": 2
+        },
+        "use_multi_channel": False,
+        "use_itn": False,
+        "use_disfluency_filter": False,
+        "use_profanity_filter": False,
+        "use_paragraph_splitter": True,
+        "paragraph_splitter": {
+            "max": 50
+        }
+    }
     try:
         with open(file_path, 'rb') as file:
             resp = requests.post(
