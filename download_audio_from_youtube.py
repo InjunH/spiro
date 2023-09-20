@@ -15,7 +15,7 @@ csv_path = "youtube_task_list.csv"
 today = datetime.now().strftime('%Y%m%d')
 
 # 다운로드 경로 설정
-download_path = f"downloads/{today}"
+download_path = f"result/{today}"
 
 # 다운로드 경로가 없으면 생성
 if not os.path.exists(download_path):
