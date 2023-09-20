@@ -34,8 +34,10 @@ with open(csv_path, 'r', encoding='utf-8-sig', newline='') as file:
         if row[0] == today and row[4] != "다운로드 완료":
             try:
                 yt = YouTube(row[1])
+                video_id = row[1].split("v=")[1].split("&")[0]  # video ID 추출
+                filename = f"{video_id}_{today}"  # 파일 이름 생성
                 stream = yt.streams.filter(only_audio=True, file_extension="mp4").first()
-                stream.download(output_path=download_path)
+                stream.download(output_path=download_path, filename=filename)  # 파일 이름 지정하여 다운로드
                 # 채널명과 타이틀 업데이트
                 row[2] = yt.author
                 row[3] = yt.title

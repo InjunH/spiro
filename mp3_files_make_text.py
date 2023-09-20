@@ -67,6 +67,7 @@ def call_vito_api_with_token(file_path):
 
         # 응답 처리
         response_data = resp.json()
+
         if 'id' in response_data:
             transcribe_id = response_data['id']
             print(f"파일 {file_path} 처리 완료. TRANSCRIBE_ID: {transcribe_id}")
@@ -155,12 +156,12 @@ folder_path = f"result/{today}"
 # 해당 폴더 내의 모든 mp3 파일을 순회하면서 API 호출
 if os.path.exists(folder_path):
     for file_name in os.listdir(folder_path):
-        if file_name.endswith('.mp3'):
-            file_path = os.path.join(folder_path, file_name)
-            transcribe_id = call_vito_api_with_token(file_path)
-            if transcribe_id:
-                print("30초 대기 후 결과를 가져옵니다.")
-                time.sleep(30)  # 30초 대기
-                get_transcribe_result(transcribe_id)
+        # if file_name.endswith('.mp3') or file_name.endswith('.mp4'):
+        file_path = os.path.join(folder_path, file_name)
+        transcribe_id = call_vito_api_with_token(file_path)
+        if transcribe_id:
+            print("30초 대기 후 결과를 가져옵니다.")
+            time.sleep(30)  # 30초 대기
+            get_transcribe_result(transcribe_id)
 else:
     print(f"{folder_path} 폴더가 존재하지 않습니다.")

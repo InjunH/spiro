@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     if os.path.exists(folder_path):
         for file_name in os.listdir(folder_path):
-            if file_name.endswith('.mp3'):
+            # if file_name.endswith('.mp3'):
                 file_path = os.path.join(folder_path, file_name)
                 transcribe_id = call_vito_api_with_token(file_path)
                 if transcribe_id:
