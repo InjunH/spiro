@@ -1,29 +1,54 @@
 import os
-import yt_dlp as ydlp
+import csv
+import logging
 from datetime import datetime
+from pytube import YouTube
 
-def download_audio_from_youtube(url):
-    video_id = url.split("v=")[-1]
-    current_date = datetime.now().strftime("%Y%m%d")
 
-    output_directory = f"result/{current_date}"
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+# 로깅 설정
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'outtmpl': os.path.join(output_directory, f'{video_id}_{current_date}'),
-        'ffmpeg_location': '/opt/homebrew/bin'  # ffmpeg 경로를 여기에 추가합니다.
-    }
+# CSV 파일 경로
+csv_path = "youtube_task_list.csv"
 
-    with ydlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+# 현재 날짜 가져오기
+today = datetime.now().strftime('%Y%m%d')
 
-if __name__ == "__main__":
-    youtube_url = input("Enter the YouTube video URL: ")
-    download_audio_from_youtube(youtube_url)
+# 다운로드 경로 설정
+download_path = f"downloads/{today}"
+
+# 다운로드 경로가 없으면 생성
+if not os.path.exists(download_path):
+    os.makedirs(download_path)
+
+updated_rows = []  # 수정된 행들을 저장할 리스트
+
+# CSV 파일 읽기
+with open(csv_path, 'r', encoding='utf-8-sig', newline='') as file:
+    reader = csv.reader(file)
+    headers = next(reader)  # 첫 번째 행은 헤더
+    updated_rows.append(headers)  # 헤더 추가
+
+    # 각 행을 순회하며 작업
+    for row in reader:
+        if row[0] == today and row[4] != "다운로드 완료":
+            try:
+                yt = YouTube(row[1])
+                stream = yt.streams.filter(only_audio=True, file_extension="mp4").first()
+                stream.download(output_path=download_path)
+                # 채널명과 타이틀 업데이트
+                row[2] = yt.author
+                row[3] = yt.title
+                row[4] = "다운로드 완료"
+                logging.info(f"{yt.title} 다운로드 완료!")
+            except Exception as e:
+                logging.error(f"{row[1]} 다운로드 중 오류 발생: {e}")
+        updated_rows.append(row)  # 수정된 행 추가
+
+# CSV 파일 업데이트
+with open(csv_path, 'w', encoding='utf-8-sig', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(updated_rows)
+
+
+logging.info("모든 작업 완료")
