@@ -19,7 +19,7 @@ def authenticate_youtube_video(row, today, download_path):
     try:
         yt = YouTube(row[1])
         video_id = row[1].split("v=")[1].split("&")[0]
-        filename = f"{video_id}_{today}"
+        filename = f"{video_id}_{today}.mp4"  # 확장자 .mp4 추가
         logger.info(f"Starting download for video: {filename}")
         stream = yt.streams.filter(only_audio=True, file_extension="mp4").first()
         stream.download(output_path=download_path, filename=filename)
