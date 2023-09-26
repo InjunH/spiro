@@ -1,14 +1,11 @@
-# spiro
-
-spiro
+### spiro
 
 ### 1. download_audio_from_youtube
 
 유튜브에서 mp4 파일을 추출합니다.
 
-## 기존에는 csv 파일 0번째 column 을 읽어서 현재 날짜인 행만 읽어와서 다운로드 했던 것을 수정했습니다.
-
-## 23.09.27 비고란에 다운로드 완료가 아니라면 다운로드 처리
+- 기존에는 csv 파일 0번째 column 을 읽어서 현재 날짜인 행만 읽어와서 다운로드 했던 것을 수정했습니다.
+- 23.09.27 비고란에 다운로드 완료가 아니라면 다운로드 처리
 
 - 명령어
   python download_audio_from_youtube.py
@@ -22,7 +19,8 @@ spiro
 vito api 인증 후 mp4 파일로 추출된 결과 파일을 json , txt 형태로 저장합니다.
 입니다.
 
-## 23.09.27 파일명을 mp3_files_make_text.py -> media_files_make_text.py 로 변경 했습니다.
+- 23.09.27 파일명을 mp3_files_make_text.py -> media_files_make_text.py 로 변경 했습니다.
+- 23.09.27 리팩토링 및 로거 추가
 
 - 명령어
   python media_files_make_text.py
@@ -40,6 +38,8 @@ vito api 인증 후 mp4 파일로 추출된 결과 파일을 json , txt 형태�
 분석된 텍스트 파일을 통해 불필요한 말버릇을 체크하여 csv 형태로 만들어줍니다.
 2에서 생성된 txt 파일을 찾아서 csv 파일로 만들어줍니다.
 
+- 23.09.27 리팩토링 및 로거 추가
+
 - 명령어
   python speech_analysis.py
 - 실행
@@ -50,6 +50,8 @@ vito api 인증 후 mp4 파일로 추출된 결과 파일을 json , txt 형태�
 ### 4.0 analysis_to_chart.py
 
 추출된 csv 파일을 통해 2D Bar chart를 만들어줍니다.
+
+- 23.09.27 리팩토링 및 로거 추가
 
 - 명령어
   python analysis_to_chart.py
