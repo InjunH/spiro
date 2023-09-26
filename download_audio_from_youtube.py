@@ -7,11 +7,20 @@ from logging.handlers import TimedRotatingFileHandler
 
 
 def setup_logger():
+    # 로거 생성
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
+
+    # TimedRotatingFileHandler 설정
     handler = TimedRotatingFileHandler('app.log', when='midnight', interval=1, backupCount=30)
     handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logger.addHandler(handler)
+
+    # StreamHandler 설정 (콘솔 출력을 위한 핸들러)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(console_handler)
+
     return logger
 
 
@@ -23,6 +32,7 @@ def authenticate_youtube_video(row, today, download_path):
         logger.info(f"Starting download for video: {filename}")
         stream = yt.streams.filter(only_audio=True, file_extension="mp4").first()
         stream.download(output_path=download_path, filename=filename)
+        row[0] = today  # 현재 날짜로 업데이트
         row[2] = yt.author
         row[3] = yt.title
         row[4] = "다운로드 완료"
@@ -58,7 +68,7 @@ if __name__ == "__main__":
         updated_rows.append(headers)
 
         for row in reader:
-            if row[0] == today and row[4] != "다운로드 완료":
+            if row[4] != "다운로드 완료":
                 authenticate_youtube_video(row, today, download_path)
             updated_rows.append(row)
 
