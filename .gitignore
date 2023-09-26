@@ -1,2 +1,7 @@
 .env
 result/*
+.DS_Store
+app.log
+app.log.2023-09-20
+app.log.2023-09-26
+__pycache__/logger_config.cpython-39.pyc
