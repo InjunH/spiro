@@ -6,7 +6,7 @@ from logger_config import setup_logger
 
 
 
-def authenticate_youtube_video(row, today, download_path):
+def authenticate_youtube_video(row, today, download_path, logger):
     try:
         yt = YouTube(row[1])
         video_id = row[1].split("v=")[1].split("&")[0]
@@ -29,8 +29,7 @@ def update_csv_file(csv_path, updated_rows):
         writer = csv.writer(file)
         writer.writerows(updated_rows)
 
-
-if __name__ == "__main__":
+def run():
     logger = setup_logger()
     logger.info("Download_audio_from_youtube started.")
 
@@ -51,8 +50,12 @@ if __name__ == "__main__":
 
         for row in reader:
             if row[4] != "다운로드 완료":
-                authenticate_youtube_video(row, today, download_path)
+                authenticate_youtube_video(row, today, download_path, logger)
             updated_rows.append(row)
 
     update_csv_file(csv_path, updated_rows)
     logger.info("Download_audio_from_youtube finished.")
+
+# if __name__ == "__main__":
+#     run()
+    

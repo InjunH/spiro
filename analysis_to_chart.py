@@ -43,7 +43,7 @@ def plot_chart(csv_path):
     plt.savefig(image_path, dpi=300)
     logger.info(f"그래프 이미지가 {image_path}에 저장되었습니다.")
 
-def main():
+def run():
     if not os.path.exists(CSV_DIR_PATH):
         logger.error(f"{CSV_DIR_PATH} 폴더가 존재하지 않습니다.")
         return
@@ -53,5 +53,5 @@ def main():
             csv_path = os.path.join(CSV_DIR_PATH, csv_file)
             plot_chart(csv_path)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     run()

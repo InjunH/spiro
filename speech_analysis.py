@@ -50,7 +50,7 @@ def save_to_csv(df, csv_path):
     df.to_csv(csv_path, index=False, encoding='utf-8-sig')
     logger.info(f"{csv_path}에 데이터를 저장했습니다.")
 
-def main():
+def run():
     if not os.path.exists(INPUT_DIR_PATH):
         logger.error(f"{INPUT_DIR_PATH} 폴더가 존재하지 않습니다.")
         return
@@ -67,8 +67,8 @@ def main():
             save_to_csv(top_20_df, output_csv_path)
             logger.info(f"{output_csv_path}에 대한 상위 20개 단어 분석을 완료했습니다.")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     run()
 
 
 
