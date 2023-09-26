@@ -3,6 +3,7 @@ import os
 from collections import Counter
 import pandas as pd
 from datetime import datetime
+from logger_config import setup_logger
 
 # Constants
 BASE_DIR = 'result'
@@ -25,10 +26,13 @@ UNNECESSARY_WORDS = [
     "지요", "진짜", "헐", "확실히"
 ]
 
+logger = setup_logger()
 
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
-        return f.read()
+        content = f.read()
+    logger.info(f"{file_path} 파일을 읽었습니다.")
+    return content
 
 def normalize_and_tokenize(text):
     normalized_text = re.sub(r'[^가-힣\s]', '', text)
@@ -44,10 +48,11 @@ def analyze_words(words):
 
 def save_to_csv(df, csv_path):
     df.to_csv(csv_path, index=False, encoding='utf-8-sig')
+    logger.info(f"{csv_path}에 데이터를 저장했습니다.")
 
 def main():
     if not os.path.exists(INPUT_DIR_PATH):
-        print(f"{INPUT_DIR_PATH} 폴더가 존재하지 않습니다.")
+        logger.error(f"{INPUT_DIR_PATH} 폴더가 존재하지 않습니다.")
         return
 
     for file_name in os.listdir(INPUT_DIR_PATH):
@@ -60,11 +65,10 @@ def main():
             df = analyze_words(words)
             top_20_df = df.head(20)
             save_to_csv(top_20_df, output_csv_path)
-            print(output_csv_path, top_20_df.head())
+            logger.info(f"{output_csv_path}에 대한 상위 20개 단어 분석을 완료했습니다.")
 
 if __name__ == "__main__":
     main()
-
 
 
 
