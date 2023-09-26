@@ -17,23 +17,23 @@ spiro
 - 결과
   result 폴더 안에 현재일 기준으로 mp4 파일이 생성됩니다.
 
-### 2.0 mp3_files_make_text.py
+### 2.0 media_files_make_text.py
 
-### 2.1 mp3_files_convert
+vito api 인증 후 mp4 파일로 추출된 결과 파일을 json , txt 형태로 저장합니다.
+입니다.
 
-vito api 인증 후 mp3 파일로 추출된 결과 파일을 json , txt 형태로 저장합니다.
-mp3_files_convert.py , mp3_files_make_text.py 동일한 결과 파일을 생성시키나 mp3_files_convert 가 코드 리팩토링을 거친 파일 입니다.
+## 23.09.27 파일명을 mp3_files_make_text.py -> media_files_make_text.py 로 변경 했습니다.
 
 - 명령어
-  python mp3_files_convert.py 또는 python mp3_files_convert.py
+  python media_files_make_text.py
 - 실행
   1. vitoAPi 인증
-  2. result/현재날짜/ 경로에 있는 mp3 읽어오기
+  2. result/현재날짜/ 경로에 있는 mp4 읽어오기
   3. 순서대로 stt 요청
      3.1 요청 결과 실패시 1분 후 재요청 (최대 10번 실행)
   4. 요청된 파일 결과 result/현재날짜 에 저장
 - 결과
-  result 폴더 안에 현재일 기준으로 mp3 파일이 생성됩니다.
+  result 폴더 안에 현재일 기준으로 mp4 파일이 생성됩니다.
 
 ### 3.0 speech_analysis.py
 
