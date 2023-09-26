@@ -4,14 +4,14 @@ spiro
 
 ### 1. download_audio_from_youtube
 
-유튜브에서 mp3 파일을 추출합니다.
+유튜브에서 mp4 파일을 추출합니다.
 
 - 명령어
   python download_audio_from_youtube.py
 - 실행
-  Enter the YouTube video URL: 유튜브 주소 입력 후 엔터
+  youtube_task_list.csv 파일을 읽어서 순차적으로 유튜브 파일을 MP4 형태로 다운로드 합니다.
 - 결과
-  result 폴더 안에 현재일 기준으로 mp3 파일이 생성됩니다.
+  result 폴더 안에 현재일 기준으로 mp4 파일이 생성됩니다.
 
 ### 2.0 mp3_files_make_text.py
 
