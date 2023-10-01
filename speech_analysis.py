@@ -31,7 +31,7 @@ logger = setup_logger()
 def read_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
-    logger.info(f"{file_path} 파일을 읽었습니다.")
+    logger.info(f"3. 말버릇 분석 - {file_path} 파일을 읽었습니다.")
     return content
 
 def normalize_and_tokenize(text):
@@ -48,15 +48,24 @@ def analyze_words(words):
 
 def save_to_csv(df, csv_path):
     df.to_csv(csv_path, index=False, encoding='utf-8-sig')
-    logger.info(f"{csv_path}에 데이터를 저장했습니다.")
+    logger.info(f"3. 말버릇 분석 - {csv_path}에 데이터를 저장했습니다.")
 
-def main():
+def was_file_processed(file_name):
+    # 확장자를 제거한 파일명
+    base_file_name = os.path.splitext(file_name)[0]
+    
+    # CSV 파일의 존재 여부로 처리 여부를 확인합니다.
+    csv_file_path = os.path.join(INPUT_DIR_PATH, base_file_name + ".csv")
+    
+    return os.path.exists(csv_file_path)
+
+def run():
     if not os.path.exists(INPUT_DIR_PATH):
-        logger.error(f"{INPUT_DIR_PATH} 폴더가 존재하지 않습니다.")
+        logger.error(f"3. 말버릇 분석 - {INPUT_DIR_PATH} 폴더가 존재하지 않습니다.")
         return
 
     for file_name in os.listdir(INPUT_DIR_PATH):
-        if file_name.endswith('.txt'):
+        if file_name.endswith('.txt') and not was_file_processed(file_name):
             input_file_path = os.path.join(INPUT_DIR_PATH, file_name)
             output_csv_path = os.path.join(INPUT_DIR_PATH, file_name.replace('.txt', '.csv'))
 
@@ -65,10 +74,10 @@ def main():
             df = analyze_words(words)
             top_20_df = df.head(20)
             save_to_csv(top_20_df, output_csv_path)
-            logger.info(f"{output_csv_path}에 대한 상위 20개 단어 분석을 완료했습니다.")
+            logger.info(f"3. 말버릇 분석 - {output_csv_path}에 대한 상위 20개 단어 분석을 완료했습니다.")
 
 if __name__ == "__main__":
-    main()
+    run()
 
 
 

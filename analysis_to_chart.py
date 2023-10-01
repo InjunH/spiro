@@ -41,17 +41,26 @@ def plot_chart(csv_path):
     image_path = os.path.join(CSV_DIR_PATH, image_file_name)
     
     plt.savefig(image_path, dpi=300)
-    logger.info(f"그래프 이미지가 {image_path}에 저장되었습니다.")
+    logger.info(f"4. 그래프 생성 - 그래프 이미지가 {image_path}에 저장되었습니다.")
 
-def main():
+def was_chart_generated(csv_file):
+    # CSV 확장자를 PNG로 변경
+    png_file_name = csv_file.replace('.csv', '.png')
+    
+    # 이미지 파일의 존재 여부로 처리 여부를 확인합니다.
+    png_file_path = os.path.join(CSV_DIR_PATH, png_file_name)
+    
+    return os.path.exists(png_file_path)
+
+def run():
     if not os.path.exists(CSV_DIR_PATH):
-        logger.error(f"{CSV_DIR_PATH} 폴더가 존재하지 않습니다.")
+        logger.error(f"4. 그래프 생성 - {CSV_DIR_PATH} 폴더가 존재하지 않습니다.")
         return
 
     for csv_file in os.listdir(CSV_DIR_PATH):
-        if csv_file.endswith('.csv'):
+        if csv_file.endswith('.csv') and not was_chart_generated(csv_file):
             csv_path = os.path.join(CSV_DIR_PATH, csv_file)
             plot_chart(csv_path)
 
 if __name__ == "__main__":
-    main()
+    run()
