@@ -27,9 +27,9 @@ def authenticate_vito(CLIENT_ID, CLIENT_SECRET):
 def call_vito_api_with_token(file_path, access_token):
     config = {
         "use_diarization": True,
-        "diarization": {
-            "spk_count": 2
-        },
+        # "diarization": {
+        #     "spk_count": 2
+        # },
         "use_multi_channel": False,
         "use_itn": False,
         "use_disfluency_filter": False,
@@ -86,10 +86,14 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
 
             # TXT 파일로 저장
             utterances = response_data.get('results', {}).get('utterances', [])
+            
+            # spk를 key로 가지고 메시지들을 list로 묶습니다.
             with open(txt_file_path, 'w', encoding='utf-8') as txt_file:
-                for index, utterance in enumerate(utterances, 1):
+                for utterance in utterances:
+                    spk = utterance.get('spk')
                     msg = utterance.get('msg', '')
-                    txt_file.write(f"index {index} : {msg}\n")
+                    txt_file.write(f"spk {spk} : {msg}\n")
+                    
             logger.info(f"2. 음성 파일 txt 변환 - 텍스트 결과가 {txt_file_path}에 저장되었습니다.")
 
 
