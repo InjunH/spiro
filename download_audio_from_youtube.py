@@ -11,7 +11,7 @@ def authenticate_youtube_video(row, today, download_path, logger):
         yt = YouTube(row[1])
         video_id = row[1].split("v=")[1].split("&")[0]
         filename = f"{video_id}_{today}.mp4"  # 확장자 .mp4 추가
-        logger.info(f"Starting download for video: {filename}")
+        logger.info(f"1. 음성 파일 다운로드 - 다운로드 진행 중: {filename}")
         stream = yt.streams.filter(only_audio=True, file_extension="mp4").first()
         stream.download(output_path=download_path, filename=filename)
         row[0] = today  # 현재 날짜로 업데이트
@@ -20,7 +20,7 @@ def authenticate_youtube_video(row, today, download_path, logger):
         row[4] = "다운로드 완료"
         logger.info(f"Download completed for video: {filename}")
     except Exception as e:
-        logger.error(f"{row[1]} 다운로드 중 오류 발생: {e}")
+        logger.error(f"{row[1]} 1. 음성 파일 다운로드 - 다운로드 중 오류 발생: {e}")
         row[4] = "다운로드 실패"
 
 
@@ -31,7 +31,7 @@ def update_csv_file(csv_path, updated_rows):
 
 def run():
     logger = setup_logger()
-    logger.info("Download_audio_from_youtube started.")
+    logger.info("1. 음성 파일 다운로드 - 시작")
 
     csv_path = "youtube_task_list.csv"
     today = datetime.now().strftime('%Y%m%d')
@@ -54,8 +54,8 @@ def run():
             updated_rows.append(row)
 
     update_csv_file(csv_path, updated_rows)
-    logger.info("Download_audio_from_youtube finished.")
+    logger.info("1. 음성 파일 다운로드 - 완료")
 
-# if __name__ == "__main__":
-#     run()
+if __name__ == "__main__":
+    run()
     
