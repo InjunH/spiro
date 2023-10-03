@@ -74,10 +74,11 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
 
         # status가 completed인 경우
         if response_data.get('status') == 'completed':
+
             # 파일명 생성 (확장자 제거하고 .json 및 .txt 추가)
             base_file_name = os.path.splitext(file_name)[0]
-            json_file_path = os.path.join(f"result/{today}", base_file_name + ".json")
-            txt_file_path = os.path.join(f"result/{today}", base_file_name + ".txt")
+            json_file_path = os.path.join(f"result/{today}", base_file_name + "_origin.json")
+            txt_file_path = os.path.join(f"result/{today}", base_file_name + "_origin.txt")
 
             # JSON 파일로 저장
             with open(json_file_path, 'w', encoding='utf-8') as json_file:
@@ -93,8 +94,43 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
                     spk = utterance.get('spk')
                     msg = utterance.get('msg', '')
                     txt_file.write(f"spk {spk} : {msg}\n")
-                    
-            logger.info(f"2. 음성 파일 txt 변환 - 텍스트 결과가 {txt_file_path}에 저장되었습니다.")
+
+            # spk를 기준으로 데이터를 그룹화
+            spk_data = {}
+
+            for utterance in utterances:
+                spk = utterance.get('spk')
+                if spk not in spk_data:
+                    spk_data[spk] = []
+                
+                spk_data[spk].append(utterance)
+
+            # 각 spk 값별로 파일 저장
+            for spk, data in spk_data.items():
+
+                # 파일명 생성 (확장자 제거하고 .json 및 .txt 추가)
+                base_file_name = os.path.splitext(file_name)[0]
+                json_file_path = os.path.join(f"result/{today}", f"{base_file_name}_spk{spk}.json")
+                txt_file_path = os.path.join(f"result/{today}", f"{base_file_name}_spk{spk}.txt")
+
+                # JSON 파일로 저장
+                with open(json_file_path, 'w', encoding='utf-8') as json_file:
+                    json_data = {
+                        "id": response_data["id"],
+                        "results": {
+                            "utterances": data
+                        }
+                    }
+                    json.dump(json_data, json_file, ensure_ascii=False, indent=4)
+                    logger.info(f"2. 음성 파일 txt 변환 - 결과가 {json_file_path}에 저장되었습니다.")
+
+                # TXT 파일로 저장
+                with open(txt_file_path, 'w', encoding='utf-8') as txt_file:
+                    for utterance in data:
+                        msg = utterance.get('msg', '')
+                        txt_file.write(f"{msg}\n")
+
+                logger.info(f"2. 음성 파일 txt 변환 - 텍스트 결과가 {txt_file_path}에 저장되었습니다.")
 
 
         # status가 transcribing이고 재시도 횟수가 10 미만인 경우
