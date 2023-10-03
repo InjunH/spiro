@@ -142,7 +142,7 @@ def process_files_in_folder(folder_path, access_token, today):
     existing_files = set(os.listdir(folder_path))
 
     for file_name in existing_files:
-        if file_name.endswith('.mp4') and not was_file_processed(file_name, today):
+        if file_name.endswith(('.mp4', '.m4a', '.mp3', '.amr', '.flac', '.wav')) and not was_file_processed(file_name, today):
             file_path = os.path.join(folder_path, file_name)
             transcribe_id = call_vito_api_with_token(file_path, access_token)
             if transcribe_id:
