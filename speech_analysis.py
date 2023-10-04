@@ -3,28 +3,17 @@ import os
 from collections import Counter
 import pandas as pd
 from datetime import datetime
+import json
+import math
 from logger_config import setup_logger
+from constants import UNNECESSARY_WORDS
 
 # Constants
 BASE_DIR = 'result'
 TODAY = datetime.now().strftime('%Y%m%d')
 INPUT_DIR_PATH = os.path.join(BASE_DIR, TODAY)
 
-# List of unnecessary words
-UNNECESSARY_WORDS = [
-    "가지고", "거", "거는", "거든", "거든요", "게", "그", "그거", "그게", "그냥", "그래도", "그래서", "그러고 나서", 
-    "그러고 보니", "그러고는", "그러니까", "그러다가", "그러다보니", "그러면", "그런 거야", "그런 거지", "그런 건", 
-    "그런 것", "그런 것 같아", "그런 것만", "그런 것보다", "그런 것에", "그런 것으로", "그런 것은", "그런 것을", "그런 것이", 
-    "그런 것이다", "그런 것이라", "그런 것이라고", "그런 것이라면", "그런 것이라서", "그런 것이면", "그런 것이었다", "그런 것인", 
-    "그런 것인가", "그런 것인데", "그런 것일", "그런 것일까", "그런 것임", "그런 것처럼", "그런데", "그럼", "그럼에도 불구하고", 
-    "그렇게", "그렇게 됐어", "그렇지 않아?", "그렇지만", "그리고", "근데", "기로", "기에", "나", "네요", "니까", "다", 
-    "더니", "더라", "더라고요", "데요", "되게", "든요", "또", "막", "뭐", "뭐랄까", "뭐지", "뭔가", "별로", "서요", "아", 
-    "아니야", "아마", "아마도", "아무래도", "아무튼", "아서", "아이구", "아이쿠", "안", "약간", "얘기를 좀", "어", "어느", 
-    "어디", "어디까지", "어디로", "어디서", "어디에", "어때", "어땠어", "어떡해", "어떤", "어떻게", "어떻게 보면", "어떻게든", 
-    "어쨌든", "어쩌다가", "어쩌면", "어쩜", "어찌나", "에요", "예요", "왜냐하면", "요", "음", "이", "이거", "이게", "이런", 
-    "이런 식으로", "이런저런", "이렇게", "이렇게저렇게", "이상하게", "이제", "자", "저", "저거", "저게", "저렇게", "좀", "죠", 
-    "지요", "진짜", "헐", "확실히"
-]
+
 
 logger = setup_logger()
 
@@ -44,11 +33,104 @@ def analyze_words(words):
     df['Needed or Not'] = ~df['Most Used Words'].isin(UNNECESSARY_WORDS)
     df.sort_values(by='Count', ascending=False, inplace=True)
     df.reset_index(drop=True, inplace=True)
-    return df
+    
+    # 'Needed or Not' 기준으로 행 카운트
+    counts = df['Needed or Not'].value_counts().to_dict()
 
-def save_to_csv(df, csv_path):
-    df.to_csv(csv_path, index=False, encoding='utf-8-sig')
-    logger.info(f"3. 말버릇 분석 - {csv_path}에 데이터를 저장했습니다.")
+    # True와 False에 대한 디폴트 값을 설정
+    counts.setdefault(True, 0)
+    counts.setdefault(False, 0)
+
+    return df, counts
+
+def get_duration_from_json(json_path):
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    utterances = data.get("results", {}).get("utterances", [])
+    total_duration = sum([utterance.get("duration", 0) for utterance in utterances])
+
+    return total_duration
+
+def get_total_unnecessary_word_count(words):
+    unnecessary_word_counts = Counter(word for word in words if word in UNNECESSARY_WORDS)
+    return sum(unnecessary_word_counts.values())
+
+def split_into_sentences(text):
+    """텍스트를 문장 단위로 분리합니다."""
+    return re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
+
+def categorize_sentences_by_words(text):
+    """불필요한 단어가 포함된 문장과 그렇지 않은 문장을 분류합니다."""
+    sentences = split_into_sentences(text)
+    
+    sentences_with_unnecessary_words = []
+    sentences_without_unnecessary_words = []
+    
+    for sentence in sentences:
+        if any(word in sentence for word in UNNECESSARY_WORDS):
+            sentences_with_unnecessary_words.append(sentence)
+            print(sentence)
+        else:
+            sentences_without_unnecessary_words.append(sentence)
+    
+    return len(sentences_with_unnecessary_words), len(sentences_without_unnecessary_words)
+
+def get_unnecessary_words_used(words):
+    """텍스트에서 사용된 불필요한 단어들의 리스트와 그 단어의 사용 횟수를 반환합니다."""
+    unnecessary_word_counts = Counter(word for word in words if word in UNNECESSARY_WORDS)
+    return [{"word": word, "count": count} for word, count in unnecessary_word_counts.items()]
+
+
+def save_to_json(df, json_path, words, counts, total_unnecessary_word_count, num_sentences_with_unnecessary, num_sentences_without_unnecessary, used_unnecessary_words):
+    # 화자 번호 추출
+    spk_num = int(re.search(r'_spk(\d+)', json_path).group(1))
+    spk_index = int(re.search(r'_spk(\d+)', json_path).group(1))
+
+    # 모든 duration 값을 가져와서 합치기
+    total_duration_ms = 0
+    base_file_name = os.path.splitext(json_path)[0].replace(f"_spk{spk_num}_origin_result", "")
+    while True:
+        spk_json_path = f"{base_file_name}_spk{spk_num}_origin.json"
+        if not os.path.exists(spk_json_path):
+            break
+        total_duration_ms += get_duration_from_json(spk_json_path)
+        spk_num += 1
+
+    # ms를 분과 초로 변환
+    minutes, remainder = divmod(total_duration_ms, 60000)
+    seconds = math.ceil(remainder / 1000)
+
+    total_duration_minutes_seconds = f"{minutes}분 {seconds}초"
+
+    
+    # 데이터프레임에서 원하는 JSON 형식으로 데이터 변환
+    data = {
+        "spk": spk_index,
+        "totalDuration": total_duration_minutes_seconds,
+        "mostUsedWords": df.apply(lambda row: {
+            "word": row['Most Used Words'],
+            "count": row['Count'],
+            "isNeeded": row['Needed or Not']
+        }, axis=1).tolist(),
+        "unecessaryWordsList": used_unnecessary_words,
+        "words": {
+            "totalWordsCnt" : len(words),
+            "totalUnnecessaryWordsCnt" : total_unnecessary_word_count,
+            "totalNecessaryWordsCnt" : len(words) - total_unnecessary_word_count,
+            "necessaryWordsGroupCnt" : counts.get(True, 0),
+            "unnecessaryWordsGroupCnt" : counts.get(False, 0),
+        },
+        "sentences": {
+            "withUnnecessaryWords": num_sentences_with_unnecessary,
+            "withoutUnnecessaryWords": num_sentences_without_unnecessary
+        }
+    }
+    
+    # JSON 파일로 저장
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    logger.info(f"3. 말버릇 분석 - {json_path}에 데이터를 저장했습니다.")
 
 def was_file_processed(file_name):
     # 확장자를 제거한 파일명
@@ -65,21 +147,24 @@ def run():
         return
 
     for file_name in os.listdir(INPUT_DIR_PATH):
-        if file_name.endswith('.txt') and not was_file_processed(file_name):
+        if re.match(r'.*_spk\d+_origin\.txt', file_name) and not was_file_processed(file_name):
             input_file_path = os.path.join(INPUT_DIR_PATH, file_name)
-            output_csv_path = os.path.join(INPUT_DIR_PATH, file_name.replace('.txt', '.csv'))
+            base_name = os.path.splitext(file_name)[0]
+            output_json_path = os.path.join(INPUT_DIR_PATH, base_name + "_result.json")
 
             text = read_file(input_file_path)
             words = normalize_and_tokenize(text)
-            df = analyze_words(words)
+            df, counts = analyze_words(words)
             top_20_df = df.head(20)
-            save_to_csv(top_20_df, output_csv_path)
-            logger.info(f"3. 말버릇 분석 - {output_csv_path}에 대한 상위 20개 단어 분석을 완료했습니다.")
+            total_unnecessary_word_count = get_total_unnecessary_word_count(words)
+
+            num_sentences_with_unnecessary, num_sentences_without_unnecessary = categorize_sentences_by_words(text)
+
+            used_unnecessary_words = get_unnecessary_words_used(words)
+
+            save_to_json(top_20_df, output_json_path, words, counts, total_unnecessary_word_count, num_sentences_with_unnecessary, num_sentences_without_unnecessary, used_unnecessary_words)
+
+            logger.info(f"3. 말버릇 분석 - {output_json_path}에 대한 상위 20개 단어 분석을 완료했습니다.")
 
 if __name__ == "__main__":
     run()
-
-
-
-
-
