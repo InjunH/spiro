@@ -77,8 +77,8 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
 
             # 파일명 생성 (확장자 제거하고 .json 및 .txt 추가)
             base_file_name = os.path.splitext(file_name)[0]
-            json_file_path = os.path.join(f"result/{today}", base_file_name + "_origin.json")
-            txt_file_path = os.path.join(f"result/{today}", base_file_name + "_origin.txt")
+            json_file_path = os.path.join(f"result/{today}", base_file_name + "_total_origin.json")
+            txt_file_path = os.path.join(f"result/{today}", base_file_name + "_total_origin.txt")
 
             # JSON 파일로 저장
             with open(json_file_path, 'w', encoding='utf-8') as json_file:
@@ -110,8 +110,8 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
 
                 # 파일명 생성 (확장자 제거하고 .json 및 .txt 추가)
                 base_file_name = os.path.splitext(file_name)[0]
-                json_file_path = os.path.join(f"result/{today}", f"{base_file_name}_spk{spk}.json")
-                txt_file_path = os.path.join(f"result/{today}", f"{base_file_name}_spk{spk}.txt")
+                json_file_path = os.path.join(f"result/{today}", f"{base_file_name}_spk{spk}_origin.json")
+                txt_file_path = os.path.join(f"result/{today}", f"{base_file_name}_spk{spk}_origin.txt")
 
                 # JSON 파일로 저장
                 with open(json_file_path, 'w', encoding='utf-8') as json_file:
