@@ -103,11 +103,16 @@ def save_to_json(df, json_path, words, counts, total_unnecessary_word_count, num
 
     total_duration_minutes_seconds = f"{minutes}분 {seconds}초"
 
+     # 분당 불필요하게 사용된 단어의 횟수 계산
+    total_duration_minutes = total_duration_ms / 60000  # ms를 분으로 변환
+    unnecessary_words_per_minute = total_unnecessary_word_count / total_duration_minutes
+    unnecessary_words_per_minute = round(unnecessary_words_per_minute)
     
     # 데이터프레임에서 원하는 JSON 형식으로 데이터 변환
     data = {
         "spk": spk_index,
         "totalDuration": total_duration_minutes_seconds,
+        "unnecessaryWordsSpokenPerMin" : unnecessary_words_per_minute,
         "mostUsedWords": df.apply(lambda row: {
             "word": row['Most Used Words'],
             "count": row['Count'],
