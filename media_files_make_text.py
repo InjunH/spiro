@@ -31,7 +31,7 @@ def call_vito_api_with_token(file_path, access_token):
         #     "spk_count": 2
         # },
         "use_multi_channel": False,
-        "use_itn": False,
+        "use_itn": True,
         "use_disfluency_filter": False,
         "use_profanity_filter": False,
         "use_paragraph_splitter": True,
