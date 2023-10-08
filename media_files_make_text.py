@@ -1,4 +1,4 @@
-from decouple import config
+# from decouple import config
 import requests
 import json
 import sys
@@ -6,7 +6,9 @@ import os
 from datetime import datetime
 import time
 from logger_config import setup_logger
+from dotenv import load_dotenv
 
+load_dotenv()
 logger = setup_logger()
 
 def authenticate_vito(CLIENT_ID, CLIENT_SECRET):
@@ -31,7 +33,7 @@ def call_vito_api_with_token(file_path, access_token):
         #     "spk_count": 2
         # },
         "use_multi_channel": False,
-        "use_itn": False,
+        "use_itn": True,
         "use_disfluency_filter": False,
         "use_profanity_filter": False,
         "use_paragraph_splitter": True,
@@ -188,8 +190,12 @@ def process_files_in_folder(folder_path, access_token, today):
 
 def run():
     logger.info("2. 음성 파일 txt 변환 - 시작")
-    CLIENT_ID = config('CLIENT_ID')
-    CLIENT_SECRET = config('CLIENT_SECRET')
+    # CLIENT_ID = config('CLIENT_ID')
+    # CLIENT_SECRET = config('CLIENT_SECRET')
+
+    CLIENT_ID = os.getenv("CLIENT_ID")
+    CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+    print(CLIENT_ID)
     access_token = authenticate_vito(CLIENT_ID, CLIENT_SECRET)
 
     today = datetime.now().strftime('%Y%m%d')
