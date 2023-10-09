@@ -68,7 +68,8 @@ def categorize_sentences_by_words(text):
     sentences_without_unnecessary_words = []
     
     for sentence in sentences:
-        if any(word in sentence for word in UNNECESSARY_WORDS):
+        words_in_sentence = sentence.split()  # 문장을 단어 단위로 분리
+        if any(word in UNNECESSARY_WORDS for word in words_in_sentence):  # 각 단어를 UNNECESSARY_WORDS 리스트와 비교
             sentences_with_unnecessary_words.append(sentence)
             print(sentence)
         else:

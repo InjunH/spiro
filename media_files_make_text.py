@@ -104,9 +104,13 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
                 for utterance in utterances:
                     spk = utterance.get('spk')
                     msg = utterance.get('msg', '')
-                    for word in UNNECESSARY_WORDS:
-                        if word in msg:
-                            msg = msg.replace(word, f"**{word}**")
+                    
+                    words_in_msg = msg.split()  # 문장을 공백 기준으로 나눈다.
+                    for i, word in enumerate(words_in_msg):
+                        if word in UNNECESSARY_WORDS:  # 각 단어가 불필요한 단어 리스트에 있는지 확인한다.
+                            words_in_msg[i] = f"**{word}**"  # 있으면 해당 단어를 강조한다.
+                    msg = ' '.join(words_in_msg)  # 단어 리스트를 다시 문자열로 합친다.
+                    
                     txt_file.write(f"spk {spk} : {msg}\n")
 
             # spk를 기준으로 데이터를 그룹화
