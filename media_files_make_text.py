@@ -7,6 +7,7 @@ from datetime import datetime
 import time
 from logger_config import setup_logger
 from dotenv import load_dotenv
+from constants import UNNECESSARY_WORDS
 
 load_dotenv()
 logger = setup_logger()
@@ -81,6 +82,7 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
             base_file_name = os.path.splitext(file_name)[0]
             json_file_path = os.path.join(f"result/{today}", base_file_name + "_total_origin.json")
             txt_file_path = os.path.join(f"result/{today}", base_file_name + "_total_origin.txt")
+            txt_file_with_masking = os.path.join(f"result/{today}", base_file_name + "_total_masking.txt")
 
             # JSON 파일로 저장
             with open(json_file_path, 'w', encoding='utf-8') as json_file:
@@ -95,6 +97,16 @@ def get_transcribe_result(transcribe_id, file_name, access_token, today, retry_c
                 for utterance in utterances:
                     spk = utterance.get('spk')
                     msg = utterance.get('msg', '')
+                    txt_file.write(f"spk {spk} : {msg}\n")
+
+            # UNNECESSARY_WORDS Bold 처리
+            with open(txt_file_with_masking, 'w', encoding='utf-8') as txt_file:
+                for utterance in utterances:
+                    spk = utterance.get('spk')
+                    msg = utterance.get('msg', '')
+                    for word in UNNECESSARY_WORDS:
+                        if word in msg:
+                            msg = msg.replace(word, f"**{word}**")
                     txt_file.write(f"spk {spk} : {msg}\n")
 
             # spk를 기준으로 데이터를 그룹화
